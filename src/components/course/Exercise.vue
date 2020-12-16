@@ -55,13 +55,12 @@
 
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button
+            <!-- <el-button
               type="primary"
               icon="el-icon-edit"
               size="mini"
               @click="showEditDialog(scope.row.id)"
-              >编辑</el-button
-            >
+              >编辑</el-button> -->
             <el-button
               type="danger"
               icon="el-icon-delete"
@@ -113,28 +112,53 @@
         :rules="addUserFormRules"
         label-width="100px"
       >
-        <el-form-item label="题目标题">
+        <!-- <el-form-item label="题目标题">
           <el-input v-model="addUserForm.stepTitle"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="题目类型">
           <el-radio-group v-model="addUserForm.stepType">
             <el-radio label="阅读题"></el-radio>
-            <el-radio label="简单题"></el-radio>
+            <el-radio label="视频观看"></el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="题目内容" name="4">
+        <el-form-item  v-if="addUserForm.stepType =='视频观看'" label="题目内容" name="4">
           <!-- 富文本编辑器 -->
-          <quill-editor v-model="addUserForm.content"></quill-editor>
+          <!-- <quill-editor v-model="addUserForm.content"></quill-editor> -->
+          <!-- action: 图片上传的API接口地址 -->
+   <a href="javascript:;">
+       <!-- <el-input v-model="addUserForm.stepTitle" disabled>视频观看</el-input> -->
+     <input type="file" name="file" @change="uploadUp($event)" 
+       enctype="multipart/form-data">
+
+       <div> <button>上传</button></div>
+
+
+    </a>
+
+
           <!-- 添加题目 -->
           <!-- <el-button type="primary" class="btnAdd" @click="addGoods">添加题目</el-button> -->
         </el-form-item>
-        <!-- <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addUserForm.email"></el-input>
+
+         <el-form-item  v-if="addUserForm.stepType =='阅读题'" name="4">
+          
+          <el-form-item label="题目标题" prop="stepTitle">
+          <el-input v-model="addUserForm.stepTitle"></el-input>
+          </el-form-item>
+
+           <el-form-item label="参考答案" prop="answerFromTeacher">
+          <el-input v-model="addUserForm.answerFromTeacher" type="textarea" :rows="5"></el-input>
+           </el-form-item>
+         
+
+          <!-- 添加题目 -->
+          <!-- <el-button type="primary" class="btnAdd" @click="addGoods">添加题目</el-button> -->
         </el-form-item>
-        <el-form-item label="手机" prop="mobile">
-          <el-input v-model="addUserForm.mobile"></el-input>
-        </el-form-item> -->
+
+
+        
+
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
@@ -157,28 +181,48 @@
         :rules="editUserFormRules"
         label-width="100px"
       >
-         <el-form-item label="题目标题">
-          <el-input v-model="editUserForm.stepTitle"></el-input>
-        </el-form-item>
+         <!-- <el-form-item label="题目标题">
+          <el-input v-model="editUserForm.title"></el-input>
+        </el-form-item> -->
         <el-form-item label="题目类型">
           <el-radio-group v-model="editUserForm.stepType">
+            <el-radio label="视频观看"></el-radio>
             <el-radio label="阅读题"></el-radio>
-            <el-radio label="简单题"></el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="题目内容" name="4">
+        <el-form-item  v-if="editUserForm.stepType =='视频观看'" label="题目内容" name="4">
           <!-- 富文本编辑器 -->
-          <quill-editor v-model="editUserForm.content"></quill-editor>
+          <!-- <quill-editor v-model="addUserForm.content"></quill-editor> -->
+          <!-- action: 图片上传的API接口地址 -->
+            <el-upload
+              :action="uploadURL"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :headers="headerObj"
+              list-type="picture"
+              :on-success="handleSuccess"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+            </el-upload>
+
           <!-- 添加题目 -->
           <!-- <el-button type="primary" class="btnAdd" @click="addGoods">添加题目</el-button> -->
         </el-form-item>
-        <!-- <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editUserForm.email"></el-input>
+
+         <el-form-item  v-if="editUserForm.stepType =='阅读题'" name="4">
+          
+          <el-form-item label="题目标题" prop="title">
+          <el-input v-model="editUserForm.title"></el-input>
+          </el-form-item>
+
+           <el-form-item label="参考答案" prop="answerFromTeacher">
+          <el-input v-model="editUserForm.answerFromTeacher" type="textarea" :rows="5"></el-input>
+          </el-form-item>
+
         </el-form-item>
-        <el-form-item label="手机" prop="mobile">
-          <el-input v-model="editUserForm.mobile"></el-input>
-        </el-form-item> -->
+
+
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="editDialogVisible = false">取 消</el-button>
@@ -189,6 +233,8 @@
 </template>
 
 <script>
+const axios = require('axios');
+
 export default {
   data() {
     // 自定义邮箱规则
@@ -231,40 +277,71 @@ export default {
         lessonId:this.$route.query.chapterId,
         stepTitle: '',
         stepType: '',
+        answerFromTeacher:'',
         content:''
+      },
+       // 用户添加
+      addUserFormMid: {
+        stepTitle: '',
+        answerFromTeacher:''
+
+      },
+       // 用户添加
+      addUserFormMid1: {
+        mes: '{\"playbackRates\":[0.7,1,1.5,2],\"sources\":[{\"src\":\"***\",\"type\":\"video/mp4\"}],\"loop\":false,\"notSupportedMessage\":\"此视频暂无法播放，请稍后再试\",\"language\":\"zh-CN\",\"aspectRatio\":\"16:9\",\"fluid\":true,\"muted\":false,\"preload\":\"auto\",\"autoplay\":false}'
       },
       // 章节添加表单验证规则
       addUserFormRules: {
         stepTitle: [
-          { required: true, message: '请输入章节名称', trigger: 'blur' },
+          { required: true, message: '请输题目标题', trigger: 'blur' },
           {
             min: 2,
             max: 30,
-            message: '章节名称的长度在2～30个字',
+            message: '题目标题的长度在2～30个字',
             trigger: 'blur'
           }
         ],  
         stepType: [
           { required: true, message: '请选择题目类型', trigger: 'change' }
+        ],  
+        answerFromTeacher: [
+          { required: true, message: '请输入参考答案', trigger: 'blur' },
+          {
+            min: 2,
+            max: 1000,
+            message: '参考答案长度在2～1000个字',
+            trigger: 'blur'
+          }
         ],         
       },
       // 修改用户
       editDialogVisible: false,
       editUserForm: {},
+      editUserFormMid: {},
+
       // 编辑用户表单验证
       editUserFormRules: {
-       stepTitle: [
-          { required: true, message: '请输入章节名称', trigger: 'blur' },
+        title: [
+          { required: true, message: '请输题目标题', trigger: 'blur' },
           {
             min: 2,
             max: 30,
-            message: '章节名称的长度在2～30个字',
+            message: '题目标题的长度在2～30个字',
             trigger: 'blur'
           }
         ],  
         stepType: [
           { required: true, message: '请选择题目类型', trigger: 'change' }
-        ],
+        ],  
+        answerFromTeacher: [
+          { required: true, message: '请输入参考答案', trigger: 'blur' },
+          {
+            min: 2,
+            max: 1000,
+            message: '参考答案长度在2～1000个字',
+            trigger: 'blur'
+          }
+        ],         
       },
       // 分配角色对话框
       setRoleDialogVisible: false,
@@ -290,6 +367,43 @@ export default {
     }
   },
   methods: {
+    uploadUp(event) {
+      // var files = event.target.files,file;
+      //  let formData = new FormData();
+      //  formData.append('file', files[0]);
+      //  axios({
+      //     url:"http://52.0.33.216:8085/eduOps/api/v1/resource/upload",
+      //     data:formData,
+      //     method:"post"
+      //  }).then(resp=>{
+      //    console.log(resp);
+      //  })
+        let file = event.target.files[0];
+        let param = new FormData(); //创建form对象
+        param.append('file',file);//通过append向form对象添加数据
+        console.log(param.get('file')); //FormData私有类对象，访问不到，可以通过get判断值是否传进去
+        let config = {
+          headers:{'Content-Type':'multipart/form-data'}
+        }; //添加请求头
+        this.$http.post('http://52.0.33.216:8085/eduOps/api/v1/resource/upload',param,config)
+          .then(response=>{
+             console.log(content)
+             var content = '{\'playbackRates\':[0.7,1,1.5,2],\'sources\':[{\'src\':\'url\',\'type\':\'video/mp4\'}],\'loop\':false,\'notSupportedMessage\':\'此视频暂无法播放，请稍后再试\',\'language\':\'zh-CN\',\'aspectRatio\':\'16:9\',\'fluid\':true,\'muted\':false,\'preload\':\'auto\',\'autoplay\':false}'
+             content = content.replace('url', response.data.data)
+            this.addUserForm.content =content;
+            this.addUserForm.stepTitle ='请认真观看视频';
+            this.addUserForm.stepType =='视频观看';
+
+            //  let reg=new RegExp('***','g')//g代表全部
+            // let newMsg=JSON.stringify(this.addUserFormMid1.mes).replace(reg,response.data);
+            // this.addUserForm.content =newMsg;
+            //   console.log(newMsg+'000***')
+            //   console.log(this.addUserForm.content+'111***')
+
+
+          })
+    },
+    
     async getUserList() {
       const { data: res } = await this.$http.get(
         "lesson/" + this.$route.query.chapterId + "/step",
@@ -300,7 +414,25 @@ export default {
       if (res.code !== 200) {
         return this.$message.error("获取题目列表失败！");
       }
+      // this.editUserFormMid =JSON.parse(res.data.content);
       this.userlist = res.data.content;
+      //  res.data.content.forEach((item, index) => {
+      //    if(item.stepType =="阅读题"){
+
+      //    }
+      //      this.editUserFormMid =JSON.parse(item.content);
+      //      this.userlist[index].title =this.editUserFormMid.title;
+      //      this.userlist[index].answerFromTeacher =this.editUserFormMid.answerFromTeacher;
+
+      //    });
+
+        
+     
+
+      
+      // this.editUserForm.title =this.editUserFormMid.title;
+      // this.editUserForm.answerFromTeacher =this.editUserFormMid.answerFromTeacher;
+
       this.totalCount = res.data.totalCount;
 
       //       const res  = {
@@ -397,15 +529,29 @@ export default {
        // 提交请求前，表单预验证
       this.$refs.addUserFormRef.validate(async valid => {
         // console.log(valid)
-        // 表单预校验失败
+        // 表单预校验失败 jin
         if (!valid) return
+         if (this.addUserForm.stepType =='视频观看') {
+          // this.addUserForm.content =this.addUserFormMid1.mes;     
+           
+         }
+         else if(this.addUserForm.stepType =='阅读题'){
+        this.addUserFormMid.title =this.addUserForm.stepTitle;
+        this.addUserFormMid.answerFromTeacher =this.addUserForm.answerFromTeacher;
+        this.addUserForm.content =JSON.stringify(this.addUserFormMid); 
+  
+
+         }
+        
+        
+
         const { data: res } = await this.$http.post('lesson/step', this.addUserForm)
         if (res.code !== 200) {
-          this.$message.error('添加章节失败！')
+          this.$message.error('添加题目失败！')
           console.log('失败')
         }
-        this.$message.success('添加章节成功！')
-                  console.log('添加章节成功！')
+        this.$message.success('添加题目成功！')
+                  console.log('添加题目成功！')
 
         // 隐藏添加章节对话框
         this.addDialogVisible = false
@@ -418,7 +564,14 @@ export default {
       if (res.code !== 200) {
         return this.$message.error("查询题目信息失败！");
       }
+
+      this.editUserFormMid =JSON.parse(res.data.content);
       this.editUserForm = res.data;
+      this.editUserForm.title =this.editUserFormMid.title;
+      this.editUserForm.answerFromTeacher =this.editUserFormMid.answerFromTeacher;
+
+
+
       this.editDialogVisible = true;
     },
     // 监听修改题目对话框的关闭事件
@@ -435,7 +588,7 @@ export default {
         const { data: res } = await this.$http.put(
           'lesson/step/' + this.editUserForm.id,
           {
-            stepTitle: this.editUserForm.stepTitle,
+            title: this.editUserForm.title,
             stepType: this.editUserForm.stepType,
             content: this.editUserForm.content,
             
@@ -466,7 +619,7 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已取消删除");
       }
-      const { data: res } = await this.$http.delete("lesson/" + id);
+      const { data: res } = await this.$http.delete("lesson/step/" + id);
       if (res.code !== 200) return this.$message.error("删除题目失败！");
       this.$message.success("删除题目成功！");
       this.getUserList();
