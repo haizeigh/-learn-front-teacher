@@ -117,8 +117,9 @@
         </el-form-item> -->
         <el-form-item label="题目类型">
           <el-radio-group v-model="addUserForm.stepType">
-            <el-radio label="阅读题"></el-radio>
+            <el-radio label="简答"></el-radio>
             <el-radio label="视频观看"></el-radio>
+            <el-radio label="单选"></el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -141,7 +142,7 @@
           <!-- <el-button type="primary" class="btnAdd" @click="addGoods">添加题目</el-button> -->
         </el-form-item>
 
-         <el-form-item  v-if="addUserForm.stepType =='阅读题'" name="4">
+         <el-form-item  v-if="addUserForm.stepType =='简答'" name="4">
           
           <el-form-item label="题目标题" prop="stepTitle">
           <el-input v-model="addUserForm.stepTitle"></el-input>
@@ -156,6 +157,33 @@
           <!-- <el-button type="primary" class="btnAdd" @click="addGoods">添加题目</el-button> -->
         </el-form-item>
 
+        <el-form-item  v-if="addUserForm.stepType =='单选'" name="4">
+          <el-form-item label="题目标题" prop="title">
+            <el-input v-model="selectData.title"></el-input>
+          </el-form-item>
+  
+          <el-form-item  label="选项一">
+            <el-input v-model="selectData.selectList[0]" style="width: 20%;" ></el-input>
+          </el-form-item>
+          <el-form-item  label="选项二">
+            <el-input v-model="selectData.selectList[1]" style="width: 20%;" ></el-input>
+          </el-form-item>
+          <el-form-item  label="选项三">
+            <el-input v-model="selectData.selectList[2]" style="width: 20%;" ></el-input>
+          </el-form-item>
+          <el-form-item  label="选项四">
+            <el-input v-model="selectData.selectList[3]" style="width: 20%;" ></el-input>
+          </el-form-item>
+        
+          <el-row :gutter="20">
+            <el-col :span="16"><div class="grid-content"></div></el-col>
+          </el-row>
+
+          <el-form-item label="参考答案" >
+            <el-input v-model="selectData.answerFromTeacher" style="width: 20%;" ></el-input>
+          </el-form-item>
+  
+       </el-form-item>
 
         
 
@@ -187,7 +215,8 @@
         <el-form-item label="题目类型">
           <el-radio-group v-model="editUserForm.stepType">
             <el-radio label="视频观看"></el-radio>
-            <el-radio label="阅读题"></el-radio>
+            <el-radio label="简答"></el-radio>
+            <el-radio label="单选"></el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -210,7 +239,7 @@
           <!-- <el-button type="primary" class="btnAdd" @click="addGoods">添加题目</el-button> -->
         </el-form-item>
 
-         <el-form-item  v-if="editUserForm.stepType =='阅读题'" name="4">
+         <el-form-item  v-if="editUserForm.stepType =='简答'" name="4">
           
           <el-form-item label="题目标题" prop="title">
           <el-input v-model="editUserForm.title"></el-input>
@@ -221,6 +250,9 @@
           </el-form-item>
 
         </el-form-item>
+
+
+      
 
 
       </el-form>
@@ -278,13 +310,17 @@ export default {
         stepTitle: '',
         stepType: '',
         answerFromTeacher:'',
-        content:''
+        content:'',
+        selectList: []
       },
        // 用户添加
       addUserFormMid: {
         stepTitle: '',
         answerFromTeacher:''
 
+      },
+      selectData:{
+        selectList: [],
       },
        // 用户添加
       addUserFormMid1: {
@@ -417,7 +453,7 @@ export default {
       // this.editUserFormMid =JSON.parse(res.data.content);
       this.userlist = res.data.content;
       //  res.data.content.forEach((item, index) => {
-      //    if(item.stepType =="阅读题"){
+      //    if(item.stepType =="简答"){
 
       //    }
       //      this.editUserFormMid =JSON.parse(item.content);
@@ -535,12 +571,15 @@ export default {
           // this.addUserForm.content =this.addUserFormMid1.mes;     
            
          }
-         else if(this.addUserForm.stepType =='阅读题'){
+         else if(this.addUserForm.stepType =='简答'){
         this.addUserFormMid.title =this.addUserForm.stepTitle;
         this.addUserFormMid.answerFromTeacher =this.addUserForm.answerFromTeacher;
         this.addUserForm.content =JSON.stringify(this.addUserFormMid); 
   
 
+         }else if(this.addUserForm.stepType =='单选'){
+
+          this.addUserForm.content =JSON.stringify(this.selectData); 
          }
         
         
@@ -658,6 +697,32 @@ export default {
 </script>
 
 <style lang="less" scoped>
+  .el-row {
+    margin-bottom: 20px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .el-col {
+    border-radius: 4px;
+  }
+  .bg-purple-dark {
+    background: #99a9bf;
+  }
+  .bg-purple {
+    background: #d3dce6;
+  }
+  .bg-purple-light {
+    background: #e5e9f2;
+  }
+  .grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+  }
+  .row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
+  }
 </style>
 
 
