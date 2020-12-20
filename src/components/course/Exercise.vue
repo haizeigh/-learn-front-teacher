@@ -123,7 +123,7 @@
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item  v-if="addUserForm.stepType =='视频观看'" label="题目内容" name="4">
+        <el-form-item  v-if="addUserForm.stepType =='视频观看'" label="上传视频" name="4">
           <!-- 富文本编辑器 -->
           <!-- <quill-editor v-model="addUserForm.content"></quill-editor> -->
           <!-- action: 图片上传的API接口地址 -->
@@ -131,11 +131,10 @@
        <!-- <el-input v-model="addUserForm.stepTitle" disabled>视频观看</el-input> -->
      <input type="file" name="file" @change="uploadUp($event)" 
        enctype="multipart/form-data">
-
-       <div> <button>上传</button></div>
-
-
+       <!-- <div> <button>上传</button></div> -->
     </a>
+    <span>只支持mp4格式</span>
+
 
 
           <!-- 添加题目 -->
@@ -421,15 +420,18 @@ export default {
         let config = {
           headers:{'Content-Type':'multipart/form-data'}
         }; //添加请求头
+        // this.$message.log('视频上传中...')
         this.$http.post('http://52.0.33.216:8085/eduOps/api/v1/resource/upload',param,config)
           .then(response=>{
-             console.log(content)
+            //  console.log(content)
              var content = '{\'playbackRates\':[0.7,1,1.5,2],\'sources\':[{\'src\':\'url\',\'type\':\'video/mp4\'}],\'loop\':false,\'notSupportedMessage\':\'此视频暂无法播放，请稍后再试\',\'language\':\'zh-CN\',\'aspectRatio\':\'16:9\',\'fluid\':true,\'muted\':false,\'preload\':\'auto\',\'autoplay\':false}'
              content = content.replace('url', response.data.data)
             this.addUserForm.content =content;
-            this.addUserForm.stepTitle ='请认真观看视频';
+            var spstr = response.data.data.split("/")
+            // console.log(spstr[spstr.length-1])
+            this.addUserForm.stepTitle = spstr[spstr.length-1];
             this.addUserForm.stepType =='视频观看';
-
+            this.$message.success('视频上传成功！')
             //  let reg=new RegExp('***','g')//g代表全部
             // let newMsg=JSON.stringify(this.addUserFormMid1.mes).replace(reg,response.data);
             // this.addUserForm.content =newMsg;
@@ -438,6 +440,8 @@ export default {
 
 
           })
+        this.$message.success('视频上传中...')
+
     },
     
     async getUserList() {
@@ -578,7 +582,7 @@ export default {
   
 
          }else if(this.addUserForm.stepType =='单选'){
-
+          this.addUserForm.stepTitle =this.selectData.title;
           this.addUserForm.content =JSON.stringify(this.selectData); 
          }
         
