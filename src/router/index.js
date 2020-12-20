@@ -23,7 +23,7 @@ const Login = () => import(/* webpackChunkName: "Login_Home_Welcome" */ '../comp
 const Register = () => import(/* webpackChunkName: "Login_Home_Welcome" */ '../components/Register.vue')
 
 const Home = () => import(/* webpackChunkName: "Login_Home_Welcome" */ '../components/Home.vue')
-const Welcome = () => import(/* webpackChunkName: "Login_Home_Welcome" */ '../components/Welcome.vue')
+// const Welcome = () => import(/* webpackChunkName: "Login_Home_Welcome" */ '../components/Welcome.vue')
 
 const Users = () => import(/* webpackChunkName: "Users_Rights_Roles" */ '../components/course/User.vue')
 // const Courses= () => import(/* webpackChunkName: "Courses_Rights_Roles" */ '../components/course/Courses.vue')
@@ -57,7 +57,7 @@ const routes = [
     component: Home,
     redirect: '/Welcome',
     children: [
-      { path: '/home', component: Welcome },
+      { path: '/home', component: Users },
       { path: '/users', component: Users },
       { path: '/terms', component: Terms },
       { path: '/classes', component: Classes },
